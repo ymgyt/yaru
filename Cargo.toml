@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = ["yaru", "yaru-core", "yarud"]
+
+[workspace.package]
+edition = "2021"
+
+[workspace.dependencies]
+anyhow = { version = "1.0" }
+clap = { version = "4.4.4" }
+serde = { version = "1.0.190",features = ["derive"] }
+serde_json = { version = "1.0.108" }
+tokio = { version = "1.32.0", default-features = false }
+tracing = { version = "0.1.37" }
+tracing-subscriber = { version = "0.3.17", default-features = false }
