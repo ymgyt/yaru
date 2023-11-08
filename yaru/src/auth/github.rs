@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{io::Write, time::Duration};
 
 use http::StatusCode;
 use reqwest::Client;
@@ -34,8 +34,11 @@ impl DeviceFlow {
         }
     }
 
-    #[tracing::instrument(skip(self))]
-    pub async fn device_flow(self) -> anyhow::Result<DeviceAccessTokenResponse> {
+    #[tracing::instrument(skip_all)]
+    pub async fn device_flow<W: Write>(
+        self,
+        writer: W,
+    ) -> anyhow::Result<DeviceAccessTokenResponse> {
         // https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps
         let scope = "user:email";
 
@@ -63,8 +66,9 @@ impl DeviceFlow {
             ..
         } = response;
 
-        println!("Open `{verification_uri}` on your browser");
-        println!("Enter CODE: `{user_code}`");
+        let mut writer = writer;
+        writeln!(&mut writer, "Open `{verification_uri}` on your browser")?;
+        writeln!(&mut writer, "Enter CODE: `{user_code}`")?;
 
         // attempt to open input screen in the browser
         open::that(verification_uri.to_string()).ok();
@@ -95,6 +99,8 @@ impl DeviceFlow {
                 .form(&DeviceAccessTokenRequest::new(&device_code, self.client_id))
                 .send()
                 .await?;
+
+            debug!("{:?}", response.status());
 
             match response.status() {
                 StatusCode::OK => {

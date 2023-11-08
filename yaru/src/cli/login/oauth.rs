@@ -30,7 +30,7 @@ impl OAuthLoginCommand {
 
         match authorization_server {
             AuthorizationServer::Github => {
-                let response = auth::github::DeviceFlow::new().device_flow().await?; 
+                let response = auth::github::DeviceFlow::new().device_flow(std::io::stdout()).await?; 
 
                 // TODO: store in cache storage
                 debug!("{response:?}");
